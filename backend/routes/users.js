@@ -10,7 +10,7 @@ router.post('/register', (req, res) => {
   User.findOne({ email })
     .then(user => {
       if (user) {
-        return res.status(400).json({ invalidEmail: 'The email is already registered' });
+        return res.status(400).json({ email: 'The email is already registered' });
       }
       const newUser = new User({
         name,
@@ -32,4 +32,21 @@ router.post('/register', (req, res) => {
     })
 });
 
+router.post('/login', (req, res) => {
+  const { email, password } = req.body;
+  User.findOne({ email })
+    .then(user => {
+      if (!user) {
+        return res.status(404).json({ email: 'User not found' });
+      }
+      // Check password
+      bcrypt.compare(password, user.password)
+        .then(isMatch => {
+          if (isMatch) {
+            res.json({ msg: "Success" });
+          }
+          return res.status(400).json({ password: "Invalid password" });
+        })
+    })
+});
 module.exports = router;
